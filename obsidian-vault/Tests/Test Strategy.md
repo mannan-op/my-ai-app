@@ -58,6 +58,13 @@ They cover:
 - NLI contradiction
 - NLI neutral
 - NLI malformed request
+- layout document QA valid image
+- layout document QA invalid image
+- vision QA valid image
+- vision QA malformed request
+- section classification default labels
+- section classification custom labels
+- section classification malformed request
 
 Run:
 

@@ -5,6 +5,7 @@ python-multipart
 PyMuPDF
 pdfplumber
 pandas
+pillow
 torch
 transformers
 sentencepiece

@@ -198,4 +198,86 @@ Response:
 }
 ```
 
+### Layout Document QA
+
+```http
+POST /layout/document-qa
+```
+
+Answers a question over a base64-encoded document image.
+
+Request:
+
+```json
+{
+  "image_base64": "<base64-png-or-jpeg>",
+  "question": "What is the total revenue?"
+}
+```
+
+Response:
+
+```json
+{
+  "answer": "100.0 million",
+  "score": 0.88
+}
+```
+
+### Vision QA
+
+```http
+POST /vision/qa
+```
+
+Answers a question over a base64-encoded image.
+
+Request:
+
+```json
+{
+  "image_base64": "<base64-png-or-jpeg>",
+  "question": "What is shown in the image?"
+}
+```
+
+Response:
+
+```json
+{
+  "answer": "bar chart",
+  "score": 0.91
+}
+```
+
+### Section Classification
+
+```http
+POST /classify/section
+```
+
+Classifies document text into a section label.
+
+Request:
+
+```json
+{
+  "text": "The company faces liquidity and market risk.",
+  "candidate_labels": [
+    "risk factors",
+    "financial statements",
+    "business"
+  ]
+}
+```
+
+Response:
+
+```json
+{
+  "label": "risk factors",
+  "score": 0.93
+}
+```
+
 Related note: [[Workflows/Model Server Inference Workflow]]
