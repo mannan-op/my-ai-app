@@ -1,17 +1,263 @@
-# Milestone 1: Project Setup
+# My AI App
 
-This milestone sets up:
+A document AI application for PDF ingestion, layout-aware extraction, hybrid retrieval, and model-server inference.
+
+The project is a monorepo with:
 
 - Next.js frontend
-- Node.js API
-- FastAPI model server skeleton
+- Node.js Express API
+- Python FastAPI model server
 - Postgres with pgvector
-- Docker Compose
-- Shared environment configuration
+- Docker Compose local runtime
+- Obsidian documentation vault
 
-No AI functionality is included yet.
+## Current Capabilities
 
-## Run everything
+- Upload PDF documents.
+- Extract PDF regions into chunks:
+  - `paragraph`
+  - `table`
+  - `footnote`
+  - `header`
+  - `footer`
+- Store document metadata and chunks in Postgres.
+- Generate and store chunk embeddings with pgvector.
+- Search chunks with hybrid retrieval:
+  - semantic vector search
+  - Postgres full-text search
+  - BM25-like `ts_rank_cd` scoring
+  - Reciprocal Rank Fusion
+- Run model-server MVP inference:
+  - table question answering
+  - NLI verification
 
-```bash
+## Services
+
+| Service | Path | URL |
+| --- | --- | --- |
+| Web | `apps/web` | `http://localhost:3000` |
+| API | `apps/api` | `http://localhost:4000` |
+| Model server | `apps/model-server` | `http://localhost:8000` |
+| Postgres | `infra/postgres` | `localhost:5432` |
+
+## Run With Docker
+
+Create `.env` if needed:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Start everything:
+
+```powershell
 docker compose up --build
+```
+
+Or use the package script:
+
+```powershell
+pnpm docker:up
+```
+
+Stop services:
+
+```powershell
+pnpm docker:down
+```
+
+## Health Checks
+
+```powershell
+Invoke-RestMethod http://localhost:4000/health
+Invoke-RestMethod http://localhost:8000/health
+```
+
+## API Workflow
+
+### 1. Upload A PDF
+
+```powershell
+curl.exe -X POST http://localhost:4000/documents/upload `
+  -F "file=@C:\path\to\your.pdf" `
+  -F "ticker=AAPL" `
+  -F "companyName=Apple Inc." `
+  -F "filingType=10-K"
+```
+
+### 2. Extract Chunks
+
+Use the returned document ID:
+
+```powershell
+Invoke-RestMethod -Method POST http://localhost:4000/documents/1/extract
+```
+
+This extracts regions, stores chunks, and generates embeddings.
+
+### 3. List Chunks
+
+```powershell
+Invoke-RestMethod http://localhost:4000/documents/1/chunks
+```
+
+Optional filters:
+
+```powershell
+Invoke-RestMethod "http://localhost:4000/documents/1/chunks?page=5"
+Invoke-RestMethod "http://localhost:4000/documents/1/chunks?type=table"
+```
+
+### 4. Hybrid Retrieval
+
+```powershell
+$body = @{
+  document_id = "doc_1"
+  query = "R&D expense 2024 revenue"
+  region_type = "table"
+  top_k = 8
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method POST http://localhost:4000/retrieval/search `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+## Model Server MVP Endpoints
+
+### Table QA
+
+```powershell
+curl.exe -X POST http://localhost:8000/table/qa `
+  -H "Content-Type: application/json" `
+  -d "{\"table\":[{\"Name\":\"Alice\",\"Age\":\"24\"},{\"Name\":\"Bob\",\"Age\":\"31\"}],\"question\":\"Who is older?\"}"
+```
+
+Response:
+
+```json
+{
+  "answer": "Bob"
+}
+```
+
+### NLI Verification
+
+```powershell
+curl.exe -X POST http://localhost:8000/verify/nli `
+  -H "Content-Type: application/json" `
+  -d "{\"premise\":\"Revenue increased by 10% in 2024.\",\"hypothesis\":\"The company had higher revenue in 2024.\"}"
+```
+
+Response:
+
+```json
+{
+  "label": "ENTAILMENT",
+  "score": 0.97
+}
+```
+
+## Important Endpoints
+
+### API
+
+- `GET /health`
+- `POST /documents/upload`
+- `GET /documents`
+- `GET /documents/:id`
+- `POST /documents/:id/extract`
+- `GET /documents/:id/chunks`
+- `POST /retrieval/search`
+
+### Model Server
+
+- `GET /health`
+- `POST /pdf/extract`
+- `POST /table/qa`
+- `POST /verify/nli`
+
+Future planned model-server endpoints:
+
+- `POST /layout/document-qa`
+- `POST /vision/qa`
+- `POST /classify/section`
+
+## Environment Variables
+
+See `.env.example` for the full list.
+
+Key groups:
+
+- Postgres:
+  - `POSTGRES_USER`
+  - `POSTGRES_PASSWORD`
+  - `POSTGRES_DB`
+  - `POSTGRES_PORT`
+  - `DATABASE_URL`
+- API:
+  - `API_PORT`
+  - `MODEL_SERVER_URL`
+- Retrieval embeddings:
+  - `EMBEDDING_PROVIDER`
+  - `EMBEDDING_MODEL`
+  - `EMBEDDING_DIMENSIONS`
+  - `OPENAI_API_KEY`
+  - `OPENAI_EMBEDDING_MODEL`
+- Model server:
+  - `MODEL_DEVICE`
+  - `MODEL_CACHE_DIR`
+  - `MODEL_BATCH_SIZE`
+  - `MODEL_MAX_SEQUENCE_LENGTH`
+  - `MODEL_PRELOAD`
+  - `TAPAS_MODEL_NAME`
+  - `NLI_MODEL_NAME`
+
+## Tests
+
+API:
+
+```powershell
+pnpm --filter api test
+pnpm --filter api build
+```
+
+Model server:
+
+```powershell
+cd apps/model-server
+python -m pytest tests
+python -m compileall app
+```
+
+## Documentation
+
+The Obsidian vault is in:
+
+```text
+obsidian-vault
+```
+
+Open that folder in Obsidian and start with:
+
+```text
+Home.md
+```
+
+Useful notes:
+
+- `Project Overview`
+- `Architecture/System Architecture`
+- `Workflows/End-to-End Document Workflow`
+- `Workflows/Hybrid Retrieval Workflow`
+- `Workflows/Model Server Inference Workflow`
+- `API/API Reference`
+- `Milestones/Milestone 5 - Model Server`
+
+## Milestones So Far
+
+- Milestone 1: project setup
+- Milestone 3: PDF extraction and chunk storage
+- Milestone 4: hybrid retrieval
+- Milestone 5 Phase 1: model-server table QA and NLI
+
