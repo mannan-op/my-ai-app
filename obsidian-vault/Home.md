@@ -26,7 +26,7 @@ This vault documents the project state up to Milestone 5: Model Server.
 
 The system can upload PDF documents, extract layout-aware document chunks, store chunks in Postgres, generate embeddings, and search chunks with hybrid retrieval.
 
-The model server also exposes MVP inference APIs for table question answering and NLI verification.
+The model server also exposes inference APIs for table question answering, NLI verification, layout document QA, vision QA, and section classification.
 
 The current retrieval path combines:
 

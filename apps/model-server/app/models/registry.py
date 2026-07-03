@@ -27,6 +27,9 @@ class ModelRegistry:
     def preload_mvp_models(self) -> None:
         self.get_table_qa_pipeline()
         self.get_nli_pipeline()
+        self.get_layout_document_qa_pipeline()
+        self.get_vision_qa_pipeline()
+        self.get_section_classifier_pipeline()
 
     def get_table_qa_pipeline(self) -> Any:
         return self._get_or_load(
@@ -40,6 +43,27 @@ class ModelRegistry:
             key="nli",
             task="text-classification",
             model_name=self.settings.nli_model_name,
+        ).instance
+
+    def get_layout_document_qa_pipeline(self) -> Any:
+        return self._get_or_load(
+            key="layout_document_qa",
+            task="document-question-answering",
+            model_name=self.settings.layout_document_qa_model_name,
+        ).instance
+
+    def get_vision_qa_pipeline(self) -> Any:
+        return self._get_or_load(
+            key="vision_qa",
+            task="visual-question-answering",
+            model_name=self.settings.vision_qa_model_name,
+        ).instance
+
+    def get_section_classifier_pipeline(self) -> Any:
+        return self._get_or_load(
+            key="section_classifier",
+            task="zero-shot-classification",
+            model_name=self.settings.section_classifier_model_name,
         ).instance
 
     def _get_or_load(self, key: str, task: str, model_name: str) -> LoadedModel:

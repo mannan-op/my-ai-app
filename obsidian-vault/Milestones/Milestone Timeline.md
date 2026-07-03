@@ -43,10 +43,13 @@ See [[Milestones/Milestone 4 - Hybrid Retrieval]].
 
 ## Milestone 5 - Model Server
 
-Implemented Phase 1 MVP:
+Implemented:
 
 - TAPAS-style table question answering endpoint
 - NLI verification endpoint
+- Layout document QA endpoint
+- Vision QA endpoint
+- Section classification endpoint
 - centralized model registry
 - model-server configuration layer
 - route/schema/service separation

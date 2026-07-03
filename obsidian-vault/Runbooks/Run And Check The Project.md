@@ -151,6 +151,51 @@ Expected shape:
 }
 ```
 
+## Run Section Classification
+
+```powershell
+$body = @{
+  text = "The company faces liquidity and market risk."
+  candidate_labels = @("risk factors", "financial statements", "business")
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method POST http://localhost:8000/classify/section `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+Expected shape:
+
+```json
+{
+  "label": "risk factors",
+  "score": 0.93
+}
+```
+
+## Run Image-Based QA
+
+`/layout/document-qa` and `/vision/qa` expect `image_base64`.
+
+```powershell
+$imageBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\path\to\image.png"))
+
+$body = @{
+  image_base64 = $imageBase64
+  question = "What is shown?"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method POST http://localhost:8000/vision/qa `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+For document-layout questions, use the same body with:
+
+```text
+http://localhost:8000/layout/document-qa
+```
+
 ## Run Tests
 
 ```powershell

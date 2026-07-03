@@ -67,6 +67,9 @@
 
 - Exposes `POST /table/qa`.
 - Exposes `POST /verify/nli`.
+- Exposes `POST /layout/document-qa`.
+- Exposes `POST /vision/qa`.
+- Exposes `POST /classify/section`.
 - Maps service failures to HTTP responses.
 
 `apps/model-server/app/core/config.py`
@@ -88,6 +91,20 @@
 
 - Calls the NLI pipeline with truncation.
 - Normalizes output labels.
+
+`apps/model-server/app/services/layout_document_qa_service.py`
+
+- Decodes a base64 document image.
+- Calls the document question answering pipeline.
+
+`apps/model-server/app/services/vision_qa_service.py`
+
+- Decodes a base64 image.
+- Calls the visual question answering pipeline.
+
+`apps/model-server/app/services/section_classifier_service.py`
+
+- Calls the zero-shot classifier over document section labels.
 
 ## Retrieval
 

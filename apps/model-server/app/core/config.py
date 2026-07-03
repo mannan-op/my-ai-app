@@ -11,6 +11,9 @@ class Settings:
     model_max_sequence_length: int
     tapas_model_name: str
     nli_model_name: str
+    layout_document_qa_model_name: str
+    vision_qa_model_name: str
+    section_classifier_model_name: str
     preload_models: bool
 
 
@@ -23,6 +26,18 @@ def get_settings() -> Settings:
         model_max_sequence_length=_positive_int("MODEL_MAX_SEQUENCE_LENGTH", 512),
         tapas_model_name=os.getenv("TAPAS_MODEL_NAME", "google/tapas-base-finetuned-wtq"),
         nli_model_name=os.getenv("NLI_MODEL_NAME", "cross-encoder/nli-deberta-v3-small"),
+        layout_document_qa_model_name=os.getenv(
+            "LAYOUT_DOCUMENT_QA_MODEL_NAME",
+            "impira/layoutlm-document-qa",
+        ),
+        vision_qa_model_name=os.getenv(
+            "VISION_QA_MODEL_NAME",
+            "dandelin/vilt-b32-finetuned-vqa",
+        ),
+        section_classifier_model_name=os.getenv(
+            "SECTION_CLASSIFIER_MODEL_NAME",
+            "facebook/bart-large-mnli",
+        ),
         preload_models=_bool("MODEL_PRELOAD", False),
     )
 

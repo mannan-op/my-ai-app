@@ -27,9 +27,12 @@ The project is a monorepo with:
   - Postgres full-text search
   - BM25-like `ts_rank_cd` scoring
   - Reciprocal Rank Fusion
-- Run model-server MVP inference:
+- Run model-server inference:
   - table question answering
   - NLI verification
+  - layout-aware document question answering
+  - vision question answering
+  - document section classification
 
 ## Services
 
@@ -123,7 +126,7 @@ Invoke-RestMethod -Method POST http://localhost:4000/retrieval/search `
   -Body $body
 ```
 
-## Model Server MVP Endpoints
+## Model Server Endpoints
 
 ### Table QA
 
@@ -158,6 +161,34 @@ Response:
 }
 ```
 
+### Layout Document QA
+
+Accepts a base64-encoded document image and a question.
+
+```powershell
+curl.exe -X POST http://localhost:8000/layout/document-qa `
+  -H "Content-Type: application/json" `
+  -d "{\"image_base64\":\"<base64-png-or-jpeg>\",\"question\":\"What is the total revenue?\"}"
+```
+
+### Vision QA
+
+Accepts a base64-encoded image and a question.
+
+```powershell
+curl.exe -X POST http://localhost:8000/vision/qa `
+  -H "Content-Type: application/json" `
+  -d "{\"image_base64\":\"<base64-png-or-jpeg>\",\"question\":\"What is shown in the image?\"}"
+```
+
+### Section Classification
+
+```powershell
+curl.exe -X POST http://localhost:8000/classify/section `
+  -H "Content-Type: application/json" `
+  -d "{\"text\":\"The company faces liquidity and market risk.\",\"candidate_labels\":[\"risk factors\",\"financial statements\",\"business\"]}"
+```
+
 ## Important Endpoints
 
 ### API
@@ -176,9 +207,6 @@ Response:
 - `POST /pdf/extract`
 - `POST /table/qa`
 - `POST /verify/nli`
-
-Future planned model-server endpoints:
-
 - `POST /layout/document-qa`
 - `POST /vision/qa`
 - `POST /classify/section`
@@ -212,6 +240,9 @@ Key groups:
   - `MODEL_PRELOAD`
   - `TAPAS_MODEL_NAME`
   - `NLI_MODEL_NAME`
+  - `LAYOUT_DOCUMENT_QA_MODEL_NAME`
+  - `VISION_QA_MODEL_NAME`
+  - `SECTION_CLASSIFIER_MODEL_NAME`
 
 ## Tests
 
@@ -259,5 +290,4 @@ Useful notes:
 - Milestone 1: project setup
 - Milestone 3: PDF extraction and chunk storage
 - Milestone 4: hybrid retrieval
-- Milestone 5 Phase 1: model-server table QA and NLI
-
+- Milestone 5: model-server table QA, NLI, layout document QA, vision QA, and section classification

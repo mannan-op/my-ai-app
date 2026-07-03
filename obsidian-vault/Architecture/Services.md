@@ -67,7 +67,7 @@ Responsibilities:
 - Receives uploaded PDF bytes from the API.
 - Extracts document regions.
 - Returns chunks with page number, region type, text, bounding box, order index, and metadata.
-- Exposes MVP inference endpoints for table QA and NLI verification.
+- Exposes inference endpoints for table QA, NLI verification, layout document QA, vision QA, and section classification.
 - Lazily loads reusable model pipelines through a model registry.
 
 Important files:
@@ -78,6 +78,9 @@ Important files:
 - `apps/model-server/app/models/registry.py`
 - `apps/model-server/app/services/table_qa_service.py`
 - `apps/model-server/app/services/nli_service.py`
+- `apps/model-server/app/services/layout_document_qa_service.py`
+- `apps/model-server/app/services/vision_qa_service.py`
+- `apps/model-server/app/services/section_classifier_service.py`
 
 ## Postgres
 

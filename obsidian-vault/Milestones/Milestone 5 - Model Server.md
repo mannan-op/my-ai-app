@@ -4,16 +4,22 @@
 
 Expose multimodal AI model capabilities through the FastAPI model server.
 
-Phase 1 MVP implements:
+Milestone 5 implements:
 
 - TAPAS-style table question answering
 - NLI verification
+- Layout document question answering
+- Vision question answering
+- Section classification
 
 ## Implemented Endpoints
 
 ```http
 POST /table/qa
 POST /verify/nli
+POST /layout/document-qa
+POST /vision/qa
+POST /classify/section
 ```
 
 ## Architecture
@@ -37,6 +43,10 @@ Files:
 - `apps/model-server/app/schemas/inference.py`
 - `apps/model-server/app/services/table_qa_service.py`
 - `apps/model-server/app/services/nli_service.py`
+- `apps/model-server/app/services/layout_document_qa_service.py`
+- `apps/model-server/app/services/vision_qa_service.py`
+- `apps/model-server/app/services/section_classifier_service.py`
+- `apps/model-server/app/services/image_utils.py`
 
 ## Model Registry
 
@@ -53,7 +63,7 @@ Model preload can be enabled with:
 MODEL_PRELOAD=true
 ```
 
-## Supported MVP Models
+## Supported Models
 
 Table QA:
 
@@ -67,6 +77,24 @@ NLI:
 NLI_MODEL_NAME=cross-encoder/nli-deberta-v3-small
 ```
 
+Layout document QA:
+
+```env
+LAYOUT_DOCUMENT_QA_MODEL_NAME=impira/layoutlm-document-qa
+```
+
+Vision QA:
+
+```env
+VISION_QA_MODEL_NAME=dandelin/vilt-b32-finetuned-vqa
+```
+
+Section classification:
+
+```env
+SECTION_CLASSIFIER_MODEL_NAME=facebook/bart-large-mnli
+```
+
 ## Configuration
 
 ```env
@@ -77,23 +105,20 @@ MODEL_MAX_SEQUENCE_LENGTH=512
 MODEL_PRELOAD=false
 TAPAS_MODEL_NAME=google/tapas-base-finetuned-wtq
 NLI_MODEL_NAME=cross-encoder/nli-deberta-v3-small
+LAYOUT_DOCUMENT_QA_MODEL_NAME=impira/layoutlm-document-qa
+VISION_QA_MODEL_NAME=dandelin/vilt-b32-finetuned-vqa
+SECTION_CLASSIFIER_MODEL_NAME=facebook/bart-large-mnli
 ```
 
 ## Future Expansion
 
-The registry and route/service structure are ready for:
+The registry and route/service structure can still expand toward:
 
-- LayoutLMv3 document QA
-- vision-language QA
-- section classification
-
-Future endpoints:
-
-```http
-POST /layout/document-qa
-POST /vision/qa
-POST /classify/section
-```
+- batching
+- model warmup endpoints
+- per-model health status
+- richer output metadata
+- production model integration tests
 
 ## Tests
 
@@ -111,4 +136,3 @@ Related notes:
 - [[API/API Reference]]
 - [[Environment Variables]]
 - [[Tests/Test Strategy]]
-
