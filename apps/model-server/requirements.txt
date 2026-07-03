@@ -4,3 +4,9 @@ python-dotenv
 python-multipart
 PyMuPDF
 pdfplumber
+pandas
+torch
+transformers
+sentencepiece
+pytest
+httpx
