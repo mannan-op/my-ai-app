@@ -27,6 +27,13 @@ The project is a monorepo with:
   - Postgres full-text search
   - BM25-like `ts_rank_cd` scoring
   - Reciprocal Rank Fusion
+- Run a LangGraph agent over retrieved evidence:
+  - planning
+  - retrieval
+  - deterministic numeric analysis
+  - verification
+  - citation construction
+  - final markdown answer generation
 - Run model-server inference:
   - table question answering
   - NLI verification
@@ -126,6 +133,21 @@ Invoke-RestMethod -Method POST http://localhost:4000/retrieval/search `
   -Body $body
 ```
 
+### 5. LangGraph Agent Answer
+
+```powershell
+$body = @{
+  document_id = "doc_1"
+  question = "What was revenue growth?"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method POST http://localhost:4000/agent/ask `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+The agent returns the final state, including the plan, retrieved chunks, extracted facts, calculations, verification result, structured citations, and final markdown answer.
+
 ## Model Server Endpoints
 
 ### Table QA
@@ -200,6 +222,7 @@ curl.exe -X POST http://localhost:8000/classify/section `
 - `POST /documents/:id/extract`
 - `GET /documents/:id/chunks`
 - `POST /retrieval/search`
+- `POST /agent/ask`
 
 ### Model Server
 
@@ -284,6 +307,7 @@ Useful notes:
 - `Workflows/Model Server Inference Workflow`
 - `API/API Reference`
 - `Milestones/Milestone 5 - Model Server`
+- `Milestones/Milestone 6 - LangGraph Agent System`
 
 ## Milestones So Far
 
@@ -291,3 +315,4 @@ Useful notes:
 - Milestone 3: PDF extraction and chunk storage
 - Milestone 4: hybrid retrieval
 - Milestone 5: model-server table QA, NLI, layout document QA, vision QA, and section classification
+- Milestone 6: LangGraph agent system for planned, verified, cited answers

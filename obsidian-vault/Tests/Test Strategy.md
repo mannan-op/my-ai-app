@@ -23,8 +23,19 @@ Current retrieval tests cover:
 - region type filtering
 - empty result handling
 - RRF ranking behavior
+- planner output
+- retrieval flow
+- deterministic calculation path
+- verification
+- citation generation
+- graph execution
+- end-to-end happy path
+- missing evidence
+- retrieval failures
 
 The retrieval tests mock the database pool. This keeps the retrieval logic testable without requiring a live Postgres container.
+
+The LangGraph agent tests mock retrieval and the LLM abstraction. This keeps graph execution deterministic while still testing the real nodes and graph.
 
 ## API Build Check
 

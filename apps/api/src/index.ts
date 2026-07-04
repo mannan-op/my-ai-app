@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import multer from "multer";
+import { agentRouter } from "./agentRoutes.js";
 import { ensureDatabaseSchema, pool } from "./db.js";
 import { documentRouter } from "./documentRoutes.js";
 import { retrievalRouter } from "./retrievalRoutes.js";
@@ -10,6 +11,7 @@ const port = Number(process.env.API_PORT ?? 4000);
 
 app.use(cors());
 app.use(express.json());
+app.use("/agent", agentRouter);
 app.use("/documents", documentRouter);
 app.use("/retrieval", retrievalRouter);
 

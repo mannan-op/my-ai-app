@@ -57,3 +57,23 @@ Implemented:
 - endpoint tests with fake pipelines
 
 See [[Milestones/Milestone 5 - Model Server]].
+
+## Milestone 6 - LangGraph Agent System
+
+Implemented:
+
+- shared typed `FilingLensState`
+- planner node
+- retriever node
+- numeric analyst node
+- verifier node
+- citation builder node
+- final answer node
+- compiled LangGraph workflow
+- `runAgent(question, documentId)` entry point
+- `POST /agent/ask`
+- deterministic calculation logic
+- structured citations
+- graph and node tests
+
+See [[Milestones/Milestone 6 - LangGraph Agent System]].
