@@ -38,6 +38,7 @@ Responsibilities:
 - Stores extracted chunks
 - Generates chunk embeddings
 - Executes hybrid retrieval
+- Runs the LangGraph answer agent
 
 Important files:
 
@@ -48,6 +49,9 @@ Important files:
 - `apps/api/src/pdfExtraction.ts`
 - `apps/api/src/retrieval.ts`
 - `apps/api/src/embeddings.ts`
+- `apps/api/src/agents/graph.ts`
+- `apps/api/src/agents/index.ts`
+- `apps/api/src/agentRoutes.ts`
 - `apps/api/src/db.ts`
 
 ## Model Server

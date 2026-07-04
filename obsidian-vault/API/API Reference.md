@@ -130,6 +130,38 @@ Related notes:
 - [[Workflows/Hybrid Retrieval Workflow]]
 - [[Glossary/Retrieval Glossary]]
 
+## LangGraph Agent
+
+```http
+POST /agent/ask
+```
+
+Runs the full LangGraph agent pipeline.
+
+Request:
+
+```json
+{
+  "document_id": "doc_1",
+  "question": "What was revenue growth?"
+}
+```
+
+Response:
+
+The route returns the final `FilingLensState`, including:
+
+- `plan`
+- `retrievedChunks`
+- `extractedFacts`
+- `calculations`
+- `verification`
+- `citations`
+- `finalAnswer`
+- `errors`
+
+Related note: [[Workflows/LangGraph Agent Workflow]]
+
 ## Model Server Inference APIs
 
 Base URL:

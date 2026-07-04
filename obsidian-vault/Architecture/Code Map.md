@@ -126,3 +126,27 @@
 - Provides embedding generation.
 - Supports deterministic local embeddings by default.
 - Supports OpenAI embeddings through environment variables.
+
+## LangGraph Agent
+
+`apps/api/src/agents/state.ts`
+
+- Defines the shared `FilingLensState`.
+- Defines plan, fact, calculation, verification, citation, and retrieved chunk types.
+
+`apps/api/src/agents/graph.ts`
+
+- Builds the LangGraph state machine.
+- Connects planner, retriever, numeric analyst, verifier, citation builder, and final answer nodes.
+
+`apps/api/src/agents/index.ts`
+
+- Exposes `runAgent(question, documentId)`.
+
+`apps/api/src/agents/nodes/*`
+
+- Implements each isolated graph node.
+
+`apps/api/src/agentRoutes.ts`
+
+- Exposes `POST /agent/ask`.

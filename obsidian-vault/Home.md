@@ -9,6 +9,7 @@ This vault documents the project state up to Milestone 5: Model Server.
 - [[Runbooks/Run And Check The Project]]
 - [[Workflows/End-to-End Document Workflow]]
 - [[Workflows/Hybrid Retrieval Workflow]]
+- [[Workflows/LangGraph Agent Workflow]]
 - [[Workflows/Model Server Inference Workflow]]
 
 ## Main Areas
@@ -20,6 +21,7 @@ This vault documents the project state up to Milestone 5: Model Server.
 - [[Tests/Test Strategy]]
 - [[Milestones/Milestone Timeline]]
 - [[Milestones/Milestone 5 - Model Server]]
+- [[Milestones/Milestone 6 - LangGraph Agent System]]
 - [[Glossary/Retrieval Glossary]]
 
 ## Current Capability
@@ -35,3 +37,5 @@ The current retrieval path combines:
 - BM25-like keyword ranking using `ts_rank_cd`
 - Reciprocal Rank Fusion for final ranking
 - metadata filters for `document_id` and `region_type`
+
+Milestone 6 wraps retrieval in a LangGraph agent that plans, retrieves, extracts facts, performs deterministic calculations, verifies evidence, builds citations, and produces a final markdown answer.

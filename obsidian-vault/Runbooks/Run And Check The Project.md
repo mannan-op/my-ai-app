@@ -105,6 +105,30 @@ Invoke-RestMethod -Method POST http://localhost:4000/retrieval/search `
 
 If there are no table results, remove `region_type` and retry.
 
+## Run LangGraph Agent
+
+```powershell
+$body = @{
+  document_id = "doc_1"
+  question = "What was revenue growth?"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method POST http://localhost:4000/agent/ask `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+Expected output includes:
+
+- `plan`
+- `retrievedChunks`
+- `extractedFacts`
+- `calculations`
+- `verification`
+- `citations`
+- `finalAnswer`
+- `errors`
+
 ## Run Table QA
 
 ```powershell
