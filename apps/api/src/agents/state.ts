@@ -62,6 +62,7 @@ export type Citation = {
 export type FilingLensState = {
   question: string;
   documentId: string;
+  runtime?: AgentRuntimeOptions;
   plan?: AgentPlan;
   retrievedChunks: RetrievedChunk[];
   extractedFacts: Fact[];
@@ -71,11 +72,43 @@ export type FilingLensState = {
   citations: Citation[];
   finalAnswer?: string;
   errors: string[];
+  telemetry?: PipelineTelemetry;
+};
+
+export type AgentRuntimeOptions = {
+  topK?: number;
+  questionId?: string;
+  evaluationId?: string;
+  saveTraces?: boolean;
+};
+
+export type StageTelemetry = {
+  stage: string;
+  startedAt: string;
+  endedAt: string;
+  durationMs: number;
+  status: "ok" | "error";
+  model?: string;
+  promptTokens?: number;
+  completionTokens?: number;
+  estimatedCostUsd?: number;
+  metadata?: Record<string, string | number | boolean | string[] | number[]>;
+  error?: string;
+};
+
+export type PipelineTelemetry = {
+  traceId: string;
+  totalDurationMs: number;
+  promptTokens: number;
+  completionTokens: number;
+  estimatedCostUsd: number;
+  stages: StageTelemetry[];
 };
 
 export const FilingLensAnnotation = Annotation.Root({
   question: Annotation<string>(),
   documentId: Annotation<string>(),
+  runtime: Annotation<AgentRuntimeOptions | undefined>(),
   plan: Annotation<AgentPlan | undefined>(),
   retrievedChunks: Annotation<RetrievedChunk[]>(),
   extractedFacts: Annotation<Fact[]>(),
@@ -84,13 +117,19 @@ export const FilingLensAnnotation = Annotation.Root({
   verification: Annotation<VerificationResult | undefined>(),
   citations: Annotation<Citation[]>(),
   finalAnswer: Annotation<string | undefined>(),
-  errors: Annotation<string[]>()
+  errors: Annotation<string[]>(),
+  telemetry: Annotation<PipelineTelemetry | undefined>()
 });
 
-export function createInitialState(question: string, documentId: string): FilingLensState {
+export function createInitialState(
+  question: string,
+  documentId: string,
+  runtime?: AgentRuntimeOptions
+): FilingLensState {
   return {
     question,
     documentId,
+    runtime,
     retrievedChunks: [],
     extractedFacts: [],
     calculations: [],
@@ -98,4 +137,3 @@ export function createInitialState(question: string, documentId: string): Filing
     errors: []
   };
 }
-

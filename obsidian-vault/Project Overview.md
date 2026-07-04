@@ -34,4 +34,4 @@ It is currently closer to a retrieval backend than a full chat application. A fu
 
 ## Current Milestone
 
-See [[Milestones/Milestone 4 - Hybrid Retrieval]], [[Milestones/Milestone 5 - Model Server]], and [[Milestones/Milestone 6 - LangGraph Agent System]].
+See [[Milestones/Milestone 4 - Hybrid Retrieval]], [[Milestones/Milestone 5 - Model Server]], [[Milestones/Milestone 6 - LangGraph Agent System]], and [[Milestones/Milestone 7 - Evaluation]].

@@ -1,12 +1,18 @@
 import { Calculation, Fact, FilingLensState } from "../state.js";
 import { runNode } from "./nodeUtils.js";
+import { finishTracedStage, startTracedStage } from "../../observability/agentTracing.js";
 
 const numberPattern = /(?<currency>\$)?(?<value>-?\d+(?:,\d{3})*(?:\.\d+)?)(?<percent>%?)/g;
 
 export async function numericAnalystNode(state: FilingLensState): Promise<FilingLensState> {
   return runNode("numericAnalystNode", state, async () => {
+    const extractionStage = startTracedStage("fact_extraction");
     const extractedFacts = extractFacts(state);
+    finishTracedStage(extractionStage, "ok", { metadata: { factCount: extractedFacts.length } });
+
+    const calculationStage = startTracedStage("calculation_engine");
     const calculations = state.plan?.needsCalculation ? calculate(extractedFacts, state.question) : [];
+    finishTracedStage(calculationStage, "ok", { metadata: { calculationCount: calculations.length } });
 
     return {
       ...state,

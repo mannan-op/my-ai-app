@@ -1,6 +1,7 @@
 import { searchChunks } from "../../retrieval.js";
 import { FilingLensState, RetrievedChunk } from "../state.js";
 import { runNode } from "./nodeUtils.js";
+import { finishTracedStage, startTracedStage } from "../../observability/agentTracing.js";
 
 export async function retrieverNode(state: FilingLensState): Promise<FilingLensState> {
   return runNode(
@@ -9,12 +10,14 @@ export async function retrieverNode(state: FilingLensState): Promise<FilingLensS
     async () => {
       const numericDocumentId = parseDocumentId(state.documentId);
       const regionType = state.plan?.requiredEvidenceTypes.length === 1 ? state.plan.requiredEvidenceTypes[0] : undefined;
+      const topK = normalizeTopK(state.runtime?.topK);
       const chunks = await searchChunks({
         documentId: numericDocumentId,
         query: buildRetrievalQuery(state),
-        topK: 10,
+        topK,
         regionType
       });
+      const chunkFilteringStage = startTracedStage("chunk_filtering");
       const retrievedChunks = deduplicateChunks(
         chunks.map((chunk) => ({
           chunkId: chunk.chunk_id,
@@ -26,6 +29,12 @@ export async function retrieverNode(state: FilingLensState): Promise<FilingLensS
           score: chunk.score
         }))
       );
+      finishTracedStage(chunkFilteringStage, "ok", {
+        metadata: {
+          beforeCount: chunks.length,
+          afterCount: retrievedChunks.length
+        }
+      });
 
       return {
         ...state,
@@ -34,6 +43,18 @@ export async function retrieverNode(state: FilingLensState): Promise<FilingLensS
     },
     { documentId: state.documentId }
   );
+}
+
+function normalizeTopK(topK: number | undefined): number {
+  if (topK === undefined) {
+    return 10;
+  }
+
+  if (!Number.isInteger(topK) || topK < 1) {
+    return 10;
+  }
+
+  return Math.min(topK, 50);
 }
 
 function buildRetrievalQuery(state: FilingLensState): string {
@@ -64,4 +85,3 @@ function parseDocumentId(documentId: string): number {
 
   return Number(match[1]);
 }
-

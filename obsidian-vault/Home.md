@@ -11,6 +11,10 @@ This vault documents the project state up to Milestone 5: Model Server.
 - [[Workflows/Hybrid Retrieval Workflow]]
 - [[Workflows/LangGraph Agent Workflow]]
 - [[Workflows/Model Server Inference Workflow]]
+- [[Evaluation/Evaluation Pipeline]]
+- [[Evaluation/Golden Dataset]]
+- [[Evaluation/Metrics]]
+- [[Evaluation/Langfuse Observability]]
 
 ## Main Areas
 
@@ -22,6 +26,7 @@ This vault documents the project state up to Milestone 5: Model Server.
 - [[Milestones/Milestone Timeline]]
 - [[Milestones/Milestone 5 - Model Server]]
 - [[Milestones/Milestone 6 - LangGraph Agent System]]
+- [[Milestones/Milestone 7 - Evaluation]]
 - [[Glossary/Retrieval Glossary]]
 
 ## Current Capability
@@ -39,3 +44,5 @@ The current retrieval path combines:
 - metadata filters for `document_id` and `region_type`
 
 Milestone 6 wraps retrieval in a LangGraph agent that plans, retrieves, extracts facts, performs deterministic calculations, verifies evidence, builds citations, and produces a final markdown answer.
+
+Milestone 7 adds full benchmarking and observability with a golden dataset, evaluator runner, quality metrics, latency/cost reporting, and Langfuse trace instrumentation.

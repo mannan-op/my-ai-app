@@ -150,3 +150,10 @@
 `apps/api/src/agentRoutes.ts`
 
 - Exposes `POST /agent/ask`.
+- Accepts optional evaluation runtime controls (`top_k`, `question_id`, `evaluation_id`, `save_traces`).
+
+`apps/api/src/observability/agentTracing.ts`
+
+- Tracks stage-level agent telemetry.
+- Emits optional Langfuse traces.
+- Collects duration, status, and metadata for every stage.

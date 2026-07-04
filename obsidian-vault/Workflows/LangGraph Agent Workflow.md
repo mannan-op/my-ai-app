@@ -39,6 +39,7 @@ Main fields:
 - `citations`
 - `finalAnswer`
 - `errors`
+- `telemetry`
 
 The state is defined in:
 
@@ -174,7 +175,8 @@ Tests cover:
 Related notes:
 
 - [[Milestones/Milestone 6 - LangGraph Agent System]]
+- [[Milestones/Milestone 7 - Evaluation]]
+- [[Evaluation/Langfuse Observability]]
 - [[Workflows/Hybrid Retrieval Workflow]]
 - [[API/API Reference]]
 - [[Tests/Test Strategy]]
-

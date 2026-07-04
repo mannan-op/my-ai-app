@@ -74,7 +74,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "e356f1d5debcb75c",
@@ -178,21 +179,21 @@
   },
   "active": "72bc8ab7be5bb464",
   "lastOpenFiles": [
-    "Milestones/Milestone 6 - LangGraph Agent System.md",
-    "Workflows/LangGraph Agent Workflow.md",
-    "Tests/Test Strategy.md",
     "Home.md",
+    "API/API Reference.md",
+    "README.md",
+    "Milestones/Milestone 5 - Model Server.md",
+    "Workflows/LangGraph Agent Workflow.md",
+    "Milestones/Milestone 6 - LangGraph Agent System.md",
+    "Tests/Test Strategy.md",
     "Project Overview.md",
     "Runbooks/Run And Check The Project.md",
-    "Milestones/Milestone 5 - Model Server.md",
     "Architecture/Code Map.md",
     "Architecture/System Architecture.md",
     "Milestones/Milestone 4 - Hybrid Retrieval.md",
-    "README.md",
     "Workflows/Model Server Inference Workflow.md",
     "Environment Variables.md",
     "Workflows/End-to-End Document Workflow.md",
-    "API/API Reference.md",
     "Milestones/Milestone Timeline.md",
     "Runbooks/Troubleshooting.md"
   ]
