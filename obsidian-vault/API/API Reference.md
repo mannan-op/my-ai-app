@@ -143,9 +143,20 @@ Request:
 ```json
 {
   "document_id": "doc_1",
-  "question": "What was revenue growth?"
+  "question": "What was revenue growth?",
+  "top_k": 10,
+  "question_id": "test_001",
+  "evaluation_id": "eval_123",
+  "save_traces": true
 }
 ```
+
+Optional fields:
+
+- `top_k`: positive integer retrieval limit
+- `question_id`: evaluation/test case identifier
+- `evaluation_id`: batch/run identifier
+- `save_traces`: trace persistence hint
 
 Response:
 
@@ -159,8 +170,12 @@ The route returns the final `FilingLensState`, including:
 - `citations`
 - `finalAnswer`
 - `errors`
+- `telemetry` (trace ID, stage timings, token/cost counters)
 
-Related note: [[Workflows/LangGraph Agent Workflow]]
+Related notes:
+
+- [[Workflows/LangGraph Agent Workflow]]
+- [[Evaluation/Langfuse Observability]]
 
 ## Model Server Inference APIs
 

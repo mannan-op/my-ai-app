@@ -1,0 +1,16 @@
+{
+  "evaluation_id": "pending_run",
+  "summary": {
+    "total_questions": 0,
+    "retrieval_hit_rate": 0,
+    "context_precision": 0,
+    "context_recall": 0,
+    "faithfulness": 0,
+    "answer_relevancy": 0,
+    "citation_accuracy": 0,
+    "numeric_accuracy": 0,
+    "average_latency_ms": 0,
+    "average_cost_usd": 0
+  },
+  "examples": []
+}

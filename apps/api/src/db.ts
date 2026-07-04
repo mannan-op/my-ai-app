@@ -1,11 +1,11 @@
 import pg from "pg";
 import dotenv from "dotenv";
+import fs from "node:fs";
+import path from "node:path";
 
-dotenv.config();
+loadEnvironment();
 
-export const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL
-});
+export const pool = new pg.Pool(createPoolConfig());
 
 export async function ensureDatabaseSchema(): Promise<void> {
   const embeddingDimensions = Number(process.env.EMBEDDING_DIMENSIONS ?? 384);
@@ -95,4 +95,49 @@ export async function ensureDatabaseSchema(): Promise<void> {
     WITH (lists = 100)
     WHERE embedding IS NOT NULL
   `);
+}
+
+function loadEnvironment(): void {
+  const candidates = [
+    path.resolve(process.cwd(), ".env"),
+    path.resolve(process.cwd(), "..", ".env"),
+    path.resolve(process.cwd(), "..", "..", ".env")
+  ];
+
+  const envPath = candidates.find((candidate) => fs.existsSync(candidate));
+
+  if (envPath) {
+    dotenv.config({ path: envPath });
+    return;
+  }
+
+  dotenv.config();
+}
+
+function createPoolConfig(): pg.PoolConfig {
+  const connectionString = process.env.DATABASE_URL?.trim();
+
+  if (connectionString) {
+    return { connectionString };
+  }
+
+  const host = process.env.PGHOST ?? "localhost";
+  const port = Number(process.env.PGPORT ?? process.env.POSTGRES_PORT ?? 5432);
+  const user = process.env.PGUSER ?? process.env.POSTGRES_USER;
+  const password = process.env.PGPASSWORD ?? process.env.POSTGRES_PASSWORD;
+  const database = process.env.PGDATABASE ?? process.env.POSTGRES_DB;
+
+  if (!user || !password || !database) {
+    throw new Error(
+      "Database configuration is missing. Set DATABASE_URL or POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB in .env."
+    );
+  }
+
+  return {
+    host,
+    port,
+    user,
+    password,
+    database
+  };
 }

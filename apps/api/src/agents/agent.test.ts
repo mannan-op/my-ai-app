@@ -147,6 +147,19 @@ describe("LangGraph agent end to end", () => {
     expect(state.verification?.passed).toBe(true);
     expect(state.citations.length).toBeGreaterThan(0);
     expect(state.finalAnswer).toContain("[C1]");
+    expect(state.telemetry?.traceId).toBeTruthy();
+    expect(state.telemetry?.totalDurationMs).toBeGreaterThanOrEqual(0);
+    expect(state.telemetry?.stages.map((stage) => stage.stage)).toEqual(
+      expect.arrayContaining([
+        "planner",
+        "retriever",
+        "numeric_analyst",
+        "verifier",
+        "citation_generator",
+        "final_answer"
+      ])
+    );
+    expect(state.telemetry?.stages.every((stage) => stage.durationMs >= 0)).toBe(true);
   });
 
   it("uses a mocked LLM for planning and final answer generation", async () => {
@@ -169,6 +182,18 @@ describe("LangGraph agent end to end", () => {
 
     expect(state.plan?.questionType).toBe("summary");
     expect(state.finalAnswer).toBe("Mock answer with 1 facts and 1 citations.");
+  });
+
+  it("honors runtime top_k options", async () => {
+    searchChunksMock.mockResolvedValue([revenueChunk]);
+
+    await runAgent("What was revenue growth?", "doc_1", { topK: 3 });
+
+    expect(searchChunksMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        topK: 3
+      })
+    );
   });
 });
 
@@ -198,4 +223,3 @@ function stateWithFact(): FilingLensState {
     ]
   };
 }
-

@@ -1,6 +1,7 @@
 import { pool } from "./db.js";
 import { embeddingToSqlVector, generateEmbedding } from "./embeddings.js";
 import { ChunkType, isChunkType } from "./documentChunks.js";
+import { finishTracedStage, startTracedStage } from "./observability/agentTracing.js";
 
 const DEFAULT_TOP_K = 8;
 const MAX_TOP_K = 50;
@@ -92,7 +93,17 @@ export async function searchChunks(input: RetrievalSearchInput): Promise<Retriev
     searchKeyword(input, candidateLimit)
   ]);
 
-  return fuseResults(vectorRows, keywordRows).slice(0, input.topK);
+  const rerankerStage = startTracedStage("reranker");
+  const fused = fuseResults(vectorRows, keywordRows).slice(0, input.topK);
+  finishTracedStage(rerankerStage, "ok", {
+    metadata: {
+      vectorCandidates: vectorRows.length,
+      keywordCandidates: keywordRows.length,
+      returnedCandidates: fused.length
+    }
+  });
+
+  return fused;
 }
 
 export function fuseResults(

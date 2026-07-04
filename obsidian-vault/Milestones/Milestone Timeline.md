@@ -77,3 +77,16 @@ Implemented:
 - graph and node tests
 
 See [[Milestones/Milestone 6 - LangGraph Agent System]].
+
+## Milestone 7 - Evaluation
+
+Implemented:
+
+- golden benchmark dataset
+- evaluation runner and report generation
+- retrieval + answer + citation + numeric metrics
+- latency and cost aggregation
+- Langfuse trace instrumentation for all major agent stages
+- evaluation and tracing tests
+
+See [[Milestones/Milestone 7 - Evaluation]].

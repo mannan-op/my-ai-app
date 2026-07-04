@@ -37,6 +37,11 @@ The retrieval tests mock the database pool. This keeps the retrieval logic testa
 
 The LangGraph agent tests mock retrieval and the LLM abstraction. This keeps graph execution deterministic while still testing the real nodes and graph.
 
+Milestone 7 adds tests for:
+
+- tracing and latency telemetry emitted from `runAgent(...)`
+- runtime retrieval controls such as `top_k`
+
 ## API Build Check
 
 Run:
@@ -83,6 +88,30 @@ Run:
 cd C:\Users\manna\my-ai-app\apps\model-server
 python -m pytest tests
 ```
+
+## Evaluation Tests
+
+Evaluation tests are in:
+
+```text
+evaluation/tests/test_metrics.py
+evaluation/tests/test_evaluator.py
+```
+
+Run:
+
+```powershell
+cd C:\Users\manna\my-ai-app
+python -m pytest evaluation/tests -q
+```
+
+Coverage includes:
+
+- retrieval hit/precision metrics
+- numeric normalization and equivalence checks
+- citation validation
+- evaluator scoring flow
+- report generation and latency breakdown parsing
 
 The model endpoint tests use fake model pipelines through the model registry, so they do not download model weights.
 

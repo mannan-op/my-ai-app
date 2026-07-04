@@ -1,0 +1,9 @@
+top_k: 10
+numeric_tolerance: 0.001
+faithfulness_model: rule_based_v1
+langfuse_enabled: false
+evaluation_batch_size: 5
+save_traces: true
+report_directory: evaluation
+agent_url: http://localhost:4000/agent/ask
+request_timeout_seconds: 5

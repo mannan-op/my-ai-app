@@ -34,6 +34,11 @@ The project is a monorepo with:
   - verification
   - citation construction
   - final markdown answer generation
+- Run Milestone 7 evaluation and observability:
+  - golden dataset benchmarks
+  - retrieval/answer/citation/numeric metrics
+  - latency + cost reporting
+  - stage-level telemetry and optional Langfuse traces
 - Run model-server inference:
   - table question answering
   - NLI verification
@@ -147,6 +152,28 @@ Invoke-RestMethod -Method POST http://localhost:4000/agent/ask `
 ```
 
 The agent returns the final state, including the plan, retrieved chunks, extracted facts, calculations, verification result, structured citations, and final markdown answer.
+
+Optional evaluation parameters:
+
+```json
+{
+  "top_k": 10,
+  "question_id": "test_001",
+  "evaluation_id": "eval_2026_07_05",
+  "save_traces": true
+}
+```
+
+### 6. Run Evaluation
+
+```powershell
+python -m evaluation.evaluator
+```
+
+Outputs:
+
+- `evaluation/results.json`
+- `evaluation/report.md`
 
 ## Model Server Endpoints
 
@@ -274,6 +301,7 @@ API:
 ```powershell
 pnpm --filter api test
 pnpm --filter api build
+python -m pytest evaluation/tests -q
 ```
 
 Model server:
@@ -308,6 +336,10 @@ Useful notes:
 - `API/API Reference`
 - `Milestones/Milestone 5 - Model Server`
 - `Milestones/Milestone 6 - LangGraph Agent System`
+- `Milestones/Milestone 7 - Evaluation`
+- `Evaluation/Evaluation Pipeline`
+- `Evaluation/Metrics`
+- `Evaluation/Langfuse Observability`
 
 ## Milestones So Far
 
@@ -316,3 +348,4 @@ Useful notes:
 - Milestone 4: hybrid retrieval
 - Milestone 5: model-server table QA, NLI, layout document QA, vision QA, and section classification
 - Milestone 6: LangGraph agent system for planned, verified, cited answers
+- Milestone 7: evaluation framework with quality metrics and stage observability
