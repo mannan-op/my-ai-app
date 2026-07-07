@@ -31,10 +31,23 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      model-server:
+        condition: service_started
     volumes:
       - ./apps/api:/app/apps/api
-      - /app/node_modules
-      - /app/apps/api/node_modules
+      - ./evaluation:/app/evaluation
+      - ./config:/app/config
+      - document_storage:/app/apps/api/storage
+    environment:
+      - CI=true
+      - REPO_ROOT=/app
+      - DOCUMENT_STORAGE_DIR=/app/apps/api/storage/documents
+      - MODEL_SERVER_URL=http://model-server:8000
+      - EVAL_RESULTS_PATH=/app/evaluation/results.json
+      - EVAL_REPORT_PATH=/app/evaluation/report.md
+      - EVAL_STATUS_PATH=/app/evaluation/.run-status.json
+      - EVAL_AGENT_URL=http://api:4000/agent/ask
+      - EVAL_PYTHON=python3
 
   web:
     build:
@@ -50,8 +63,10 @@ services:
       - api
     volumes:
       - ./apps/web:/app/apps/web
-      - /app/node_modules
-      - /app/apps/web/node_modules
+      - ./evaluation:/app/evaluation
+    environment:
+      - CI=true
+      - EVAL_RESULTS_PATH=/app/evaluation/results.json
 
   model-server:
     build:
@@ -63,8 +78,7 @@ services:
       - .env
     ports:
       - "8000:8000"
-    volumes:
-      - ./apps/model-server:/app
 
 volumes:
   postgres_data:
+  document_storage:

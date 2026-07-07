@@ -304,9 +304,17 @@ def write_outputs(results: dict[str, Any], report_markdown: str, output_director
 
 
 def main() -> None:
+    import os
+    from dataclasses import replace
+
     config = load_evaluation_config()
+    agent_url = os.environ.get("EVAL_AGENT_URL")
+    if agent_url:
+        config = replace(config, agent_url=agent_url)
+
+    evaluation_id = os.environ.get("EVALUATION_ID")
     dataset = load_golden_dataset()
-    results = run_evaluation(config, dataset)
+    results = run_evaluation(config, dataset, evaluation_id)
     report = generate_markdown_report(results)
     write_outputs(results, report, config.report_directory)
 

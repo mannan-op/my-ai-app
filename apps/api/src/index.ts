@@ -4,6 +4,7 @@ import multer from "multer";
 import { agentRouter } from "./agentRoutes.js";
 import { ensureDatabaseSchema, pool } from "./db.js";
 import { documentRouter } from "./documentRoutes.js";
+import { evaluationRouter } from "./evaluationRoutes.js";
 import { retrievalRouter } from "./retrievalRoutes.js";
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/agent", agentRouter);
 app.use("/documents", documentRouter);
+app.use("/evaluations", evaluationRouter);
 app.use("/retrieval", retrievalRouter);
 
 app.get("/health", async (_req, res) => {

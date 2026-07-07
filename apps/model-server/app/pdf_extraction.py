@@ -124,9 +124,22 @@ def extract_pdf_regions(pdf_bytes: bytes) -> ExtractionResult:
     )
 
 
-def _render_page(page: fitz.Page) -> bytes:
-    pixmap = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
+def _render_page(page: fitz.Page, scale: float = 2.0) -> bytes:
+    pixmap = page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
     return pixmap.tobytes("png")
+
+
+def render_pdf_page(pdf_bytes: bytes, page_number: int, scale: float = 2.0) -> tuple[bytes, float, float]:
+    try:
+        document = fitz.open(stream=pdf_bytes, filetype="pdf")
+    except Exception as exc:
+        raise ValueError("invalid_pdf") from exc
+
+    if page_number < 1 or page_number > document.page_count:
+        raise ValueError("invalid_page")
+
+    page = document[page_number - 1]
+    return _render_page(page, scale), page.rect.width, page.rect.height
 
 
 def _extract_text_blocks(page: fitz.Page) -> list[dict[str, Any]]:

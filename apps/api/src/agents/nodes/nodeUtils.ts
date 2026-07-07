@@ -49,7 +49,7 @@ export function appendError(state: FilingLensState, nodeName: string, message: s
   };
 }
 
-function toStageName(nodeName: string): string {
+export function toStageName(nodeName: string): string {
   if (nodeName === "plannerNode") {
     return "planner";
   }

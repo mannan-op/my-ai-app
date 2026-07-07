@@ -12,6 +12,7 @@ export type FinalAnswerInput = {
 export type AgentLlm = {
   createPlan(question: string): Promise<AgentPlan>;
   createFinalAnswer(input: FinalAnswerInput): Promise<string>;
+  createFinalAnswerStream(input: FinalAnswerInput): AsyncGenerator<string>;
 };
 
 class DeterministicAgentLlm implements AgentLlm {
@@ -70,6 +71,17 @@ class DeterministicAgentLlm implements AgentLlm {
     }
 
     return lines.join("\n");
+  }
+
+  async *createFinalAnswerStream(input: FinalAnswerInput): AsyncGenerator<string> {
+    const answer = await this.createFinalAnswer(input);
+    const tokens = answer.split(/(\s+)/);
+
+    for (const token of tokens) {
+      if (token) {
+        yield token;
+      }
+    }
   }
 }
 

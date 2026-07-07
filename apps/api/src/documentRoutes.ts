@@ -15,6 +15,7 @@ import {
   MissingPdfFileError,
   UnreadablePdfError
 } from "./pdfExtraction.js";
+import { InvalidPageError, renderDocumentPage } from "./pageRender.js";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -95,6 +96,64 @@ documentRouter.get("/:id", async (req, res) => {
   }
 
   res.json(document);
+});
+
+documentRouter.get("/:id/pages/:page", async (req, res) => {
+  const id = Number(req.params.id);
+  const page = Number(req.params.page);
+  const scale = req.query.scale === undefined ? 2 : Number(req.query.scale);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    res.status(404).json({
+      error: "document_not_found",
+      message: "Document not found."
+    });
+    return;
+  }
+
+  if (!Number.isFinite(scale) || scale < 0.5 || scale > 4) {
+    res.status(400).json({
+      error: "invalid_scale",
+      message: "Scale must be a number between 0.5 and 4."
+    });
+    return;
+  }
+
+  try {
+    const rendered = await renderDocumentPage(id, page, scale);
+
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader("X-Page-Width", String(rendered.pageWidth));
+    res.setHeader("X-Page-Height", String(rendered.pageHeight));
+    res.setHeader("X-Render-Scale", String(rendered.renderScale));
+    res.send(rendered.buffer);
+  } catch (error) {
+    if (error instanceof DocumentNotFoundError) {
+      res.status(404).json({
+        error: "document_not_found",
+        message: "Document not found."
+      });
+      return;
+    }
+
+    if (error instanceof MissingPdfFileError) {
+      res.status(404).json({
+        error: "missing_pdf_file",
+        message: "The stored PDF file could not be found."
+      });
+      return;
+    }
+
+    if (error instanceof InvalidPageError) {
+      res.status(400).json({
+        error: "invalid_page",
+        message: "Page must be a positive integer within the document page count."
+      });
+      return;
+    }
+
+    throw error;
+  }
 });
 
 documentRouter.post("/:id/extract", async (req, res) => {

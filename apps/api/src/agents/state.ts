@@ -80,6 +80,7 @@ export type AgentRuntimeOptions = {
   questionId?: string;
   evaluationId?: string;
   saveTraces?: boolean;
+  onAnswerToken?: (token: string) => void;
 };
 
 export type StageTelemetry = {

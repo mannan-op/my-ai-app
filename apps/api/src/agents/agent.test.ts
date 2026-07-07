@@ -175,6 +175,9 @@ describe("LangGraph agent end to end", () => {
       },
       async createFinalAnswer(input) {
         return `Mock answer with ${input.facts.length} facts and ${input.citations.length} citations.`;
+      },
+      async *createFinalAnswerStream(input) {
+        yield `Mock answer with ${input.facts.length} facts and ${input.citations.length} citations.`;
       }
     });
 
