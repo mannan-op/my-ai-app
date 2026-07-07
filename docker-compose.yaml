@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
       - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -41,6 +41,7 @@ services:
     environment:
       - CI=true
       - REPO_ROOT=/app
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - DOCUMENT_STORAGE_DIR=/app/apps/api/storage/documents
       - MODEL_SERVER_URL=http://model-server:8000
       - EVAL_RESULTS_PATH=/app/evaluation/results.json

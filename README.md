@@ -1,71 +1,59 @@
-# My AI App
+# FillingLens
 
-A document AI application for PDF ingestion, layout-aware extraction, hybrid retrieval, and model-server inference.
+**FillingLens** is an analyst workspace for SEC filings and financial documents. Upload PDFs, extract layout-aware chunks, search with hybrid retrieval, and ask questions through a LangGraph agent that plans, retrieves evidence, runs numeric analysis, verifies claims, and returns cited markdown answers. A Python model server handles PDF extraction and specialized inference (table QA, NLI, layout/vision QA, section classification). An evaluation pipeline benchmarks retrieval, answer quality, citations, and latency against a golden dataset.
 
-The project is a monorepo with:
+> **Naming note:** The product is branded **FillingLens** in this README. The codebase still uses **FilingLens** in several places (for example `FilingLensState` in the API agent and UI labels in `apps/web`).
 
-- Next.js frontend
-- Node.js Express API
-- Python FastAPI model server
-- Postgres with pgvector
-- Docker Compose local runtime
-- Obsidian documentation vault
+## Architecture
 
-## Current Capabilities
+The API coordinates the system: it owns public routes, persists metadata and chunks, calls the model server, and runs the LangGraph agent. Postgres with the **pgvector** extension stores relational data, embeddings, and full-text search indexes. The evaluation pipeline drives the agent through golden examples and writes benchmark reports.
 
-- Upload PDF documents.
-- Extract PDF regions into chunks:
-  - `paragraph`
-  - `table`
-  - `footnote`
-  - `header`
-  - `footer`
-- Store document metadata and chunks in Postgres.
-- Generate and store chunk embeddings with pgvector.
-- Search chunks with hybrid retrieval:
-  - semantic vector search
-  - Postgres full-text search
-  - BM25-like `ts_rank_cd` scoring
-  - Reciprocal Rank Fusion
-- Run a LangGraph agent over retrieved evidence:
-  - planning
-  - retrieval
-  - deterministic numeric analysis
-  - verification
-  - citation construction
-  - final markdown answer generation
-- Run Milestone 7 evaluation and observability:
-  - golden dataset benchmarks
-  - retrieval/answer/citation/numeric metrics
-  - latency + cost reporting
-  - stage-level telemetry and optional Langfuse traces
-- Run model-server inference:
-  - table question answering
-  - NLI verification
-  - layout-aware document question answering
-  - vision question answering
-  - document section classification
+```mermaid
+flowchart TB
+  User["Analyst / Client"]
+  Web["Web — Next.js\nlocalhost:3000"]
+  API["API — Express + LangGraph\nlocalhost:4000"]
+  Model["Model Server — FastAPI\nlocalhost:8000"]
+  DB[("Postgres + pgvector\nlocalhost:5432")]
+  Disk["PDF storage\napps/api/storage"]
+  Eval["Evaluation pipeline\nevaluation/"]
 
-## Services
+  User --> Web
+  User --> API
+  Web --> API
+  API --> DB
+  API --> Disk
+  API --> Model
+  Eval -->|"POST /agent/ask"| API
+  Eval --> Results["results.json + report.md"]
+```
 
-| Service | Path | URL |
-| --- | --- | --- |
-| Web | `apps/web` | `http://localhost:3000` |
-| API | `apps/api` | `http://localhost:4000` |
-| Model server | `apps/model-server` | `http://localhost:8000` |
-| Postgres | `infra/postgres` | `localhost:5432` |
+## Monorepo structure
 
-## Run With Docker
+| Path | Role |
+| --- | --- |
+| `apps/web` | Next.js frontend — dashboard, document library, chat, evals UI |
+| `apps/api` | Express API — uploads, extraction orchestration, hybrid retrieval, LangGraph agent |
+| `apps/model-server` | FastAPI service — PDF layout extraction and ML inference endpoints |
+| `evaluation/` | Golden-dataset benchmarks, metrics, and report generation |
+| `infra/postgres` | Postgres bootstrap SQL (includes pgvector setup) |
+| `config/` | Evaluation and runtime configuration |
+| `obsidian-vault/` | Detailed architecture, workflows, and API reference |
 
-Create `.env` if needed:
+## Prerequisites
+
+- **Docker Desktop** (recommended) — runs Postgres, API, web, and model server together with correct networking
+- **Node.js** 20+ and **pnpm** 9+ — local web/API development
+- **Python** 3.11+ — running evaluation CLI and model-server tests locally
+
+## Quick start
+
+### Docker (recommended)
+
+From the repo root:
 
 ```powershell
 Copy-Item .env.example .env
-```
-
-Start everything:
-
-```powershell
 docker compose up --build
 ```
 
@@ -81,90 +69,68 @@ Stop services:
 pnpm docker:down
 ```
 
-## Health Checks
+Verify health:
 
 ```powershell
 Invoke-RestMethod http://localhost:4000/health
 Invoke-RestMethod http://localhost:8000/health
 ```
 
-## API Workflow
+Open the web app at [http://localhost:3000](http://localhost:3000).
 
-### 1. Upload A PDF
+### Local development
 
-```powershell
-curl.exe -X POST http://localhost:4000/documents/upload `
-  -F "file=@C:\path\to\your.pdf" `
-  -F "ticker=AAPL" `
-  -F "companyName=Apple Inc." `
-  -F "filingType=10-K"
-```
-
-### 2. Extract Chunks
-
-Use the returned document ID:
+For faster iteration on the frontend and API, run Postgres and the model server via Docker, then start the Node apps locally:
 
 ```powershell
-Invoke-RestMethod -Method POST http://localhost:4000/documents/1/extract
+docker compose up postgres model-server
+pnpm install
+pnpm dev
 ```
 
-This extracts regions, stores chunks, and generates embeddings.
+`pnpm dev` runs `apps/web` and `apps/api` in parallel. When the API runs on the host, set `DATABASE_URL` to point at localhost (not the Docker service name `postgres`):
 
-### 3. List Chunks
+```env
+DATABASE_URL=postgresql://app_usr:app_usr_pass@localhost:5432/app_db
+MODEL_SERVER_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:4000
+```
+
+## Environment setup
+
+Copy the example env file and adjust as needed:
 
 ```powershell
-Invoke-RestMethod http://localhost:4000/documents/1/chunks
+Copy-Item .env.example .env
 ```
 
-Optional filters:
+Key variables:
 
-```powershell
-Invoke-RestMethod "http://localhost:4000/documents/1/chunks?page=5"
-Invoke-RestMethod "http://localhost:4000/documents/1/chunks?type=table"
-```
+| Group | Variables | Notes |
+| --- | --- | --- |
+| Postgres | `POSTGRES_*`, `DATABASE_URL` | Must use a Postgres image with **pgvector** (see `docker-compose.yaml`) |
+| API | `API_PORT`, `MODEL_SERVER_URL` | API defaults to port 4000 |
+| Web | `NEXT_PUBLIC_API_URL` | Browser-facing API base URL |
+| Embeddings | `EMBEDDING_PROVIDER`, `OPENAI_API_KEY` | Default is deterministic local embeddings; set `openai` for production-quality vectors |
+| Model server | `MODEL_*`, `TAPAS_MODEL_NAME`, etc. | Hugging Face model names and device settings |
+| Observability | `LANGFUSE_*` | Optional Langfuse tracing for agent stages |
 
-### 4. Hybrid Retrieval
+See `.env.example` for the full list.
 
-```powershell
-$body = @{
-  document_id = "doc_1"
-  query = "R&D expense 2024 revenue"
-  region_type = "table"
-  top_k = 8
-} | ConvertTo-Json
+## Key URLs
 
-Invoke-RestMethod -Method POST http://localhost:4000/retrieval/search `
-  -ContentType "application/json" `
-  -Body $body
-```
+| Service | URL |
+| --- | --- |
+| Web | [http://localhost:3000](http://localhost:3000) |
+| API | [http://localhost:4000](http://localhost:4000) |
+| Model server | [http://localhost:8000](http://localhost:8000) |
+| Postgres | `localhost:5432` |
 
-### 5. LangGraph Agent Answer
+Primary API routes: `GET /health`, `POST /documents/upload`, `POST /documents/:id/extract`, `POST /retrieval/search`, `POST /agent/ask`.
 
-```powershell
-$body = @{
-  document_id = "doc_1"
-  question = "What was revenue growth?"
-} | ConvertTo-Json
+## Evaluation
 
-Invoke-RestMethod -Method POST http://localhost:4000/agent/ask `
-  -ContentType "application/json" `
-  -Body $body
-```
-
-The agent returns the final state, including the plan, retrieved chunks, extracted facts, calculations, verification result, structured citations, and final markdown answer.
-
-Optional evaluation parameters:
-
-```json
-{
-  "top_k": 10,
-  "question_id": "test_001",
-  "evaluation_id": "eval_2026_07_05",
-  "save_traces": true
-}
-```
-
-### 6. Run Evaluation
+Run the golden-dataset benchmark (requires the API to be reachable):
 
 ```powershell
 python -m evaluation.evaluator
@@ -172,180 +138,50 @@ python -m evaluation.evaluator
 
 Outputs:
 
-- `evaluation/results.json`
-- `evaluation/report.md`
+- `evaluation/results.json` — machine-readable metrics
+- `evaluation/report.md` — human-readable summary
 
-## Model Server Endpoints
+The eval UI at `/evals` reads results when services run under Docker Compose.
 
-### Table QA
+## Troubleshooting
 
-```powershell
-curl.exe -X POST http://localhost:8000/table/qa `
-  -H "Content-Type: application/json" `
-  -d "{\"table\":[{\"Name\":\"Alice\",\"Age\":\"24\"},{\"Name\":\"Bob\",\"Age\":\"31\"}],\"question\":\"Who is older?\"}"
-```
+**Web shows "failed to fetch" or network errors**
 
-Response:
+The API is not running, or `NEXT_PUBLIC_API_URL` does not match where the API listens. Confirm `http://localhost:4000/health` returns `"status": "ok"`.
 
-```json
-{
-  "answer": "Bob"
-}
-```
+**API health reports a database error**
 
-### NLI Verification
+Postgres is down or `DATABASE_URL` is wrong. Inside Docker, use the service hostname `postgres`. On the host, use `localhost`. Ensure you are using a **pgvector-enabled** Postgres image — plain Postgres will fail on embedding columns.
 
-```powershell
-curl.exe -X POST http://localhost:8000/verify/nli `
-  -H "Content-Type: application/json" `
-  -d "{\"premise\":\"Revenue increased by 10% in 2024.\",\"hypothesis\":\"The company had higher revenue in 2024.\"}"
-```
+**Extraction fails**
 
-Response:
+The model server must be up at port 8000. Inside Docker, `MODEL_SERVER_URL` should be `http://model-server:8000`; on the host, use `http://localhost:8000`.
 
-```json
-{
-  "label": "ENTAILMENT",
-  "score": 0.97
-}
-```
+**Retrieval returns no chunks**
 
-### Layout Document QA
+Upload a PDF, run extraction (`POST /documents/:id/extract`), then search. Try without a restrictive `region_type` filter. Re-extract if embeddings were generated before a provider change.
 
-Accepts a base64-encoded document image and a question.
+**OpenAI embeddings fail**
 
-```powershell
-curl.exe -X POST http://localhost:8000/layout/document-qa `
-  -H "Content-Type: application/json" `
-  -d "{\"image_base64\":\"<base64-png-or-jpeg>\",\"question\":\"What is the total revenue?\"}"
-```
-
-### Vision QA
-
-Accepts a base64-encoded image and a question.
-
-```powershell
-curl.exe -X POST http://localhost:8000/vision/qa `
-  -H "Content-Type: application/json" `
-  -d "{\"image_base64\":\"<base64-png-or-jpeg>\",\"question\":\"What is shown in the image?\"}"
-```
-
-### Section Classification
-
-```powershell
-curl.exe -X POST http://localhost:8000/classify/section `
-  -H "Content-Type: application/json" `
-  -d "{\"text\":\"The company faces liquidity and market risk.\",\"candidate_labels\":[\"risk factors\",\"financial statements\",\"business\"]}"
-```
-
-## Important Endpoints
-
-### API
-
-- `GET /health`
-- `POST /documents/upload`
-- `GET /documents`
-- `GET /documents/:id`
-- `POST /documents/:id/extract`
-- `GET /documents/:id/chunks`
-- `POST /retrieval/search`
-- `POST /agent/ask`
-
-### Model Server
-
-- `GET /health`
-- `POST /pdf/extract`
-- `POST /table/qa`
-- `POST /verify/nli`
-- `POST /layout/document-qa`
-- `POST /vision/qa`
-- `POST /classify/section`
-
-## Environment Variables
-
-See `.env.example` for the full list.
-
-Key groups:
-
-- Postgres:
-  - `POSTGRES_USER`
-  - `POSTGRES_PASSWORD`
-  - `POSTGRES_DB`
-  - `POSTGRES_PORT`
-  - `DATABASE_URL`
-- API:
-  - `API_PORT`
-  - `MODEL_SERVER_URL`
-- Retrieval embeddings:
-  - `EMBEDDING_PROVIDER`
-  - `EMBEDDING_MODEL`
-  - `EMBEDDING_DIMENSIONS`
-  - `OPENAI_API_KEY`
-  - `OPENAI_EMBEDDING_MODEL`
-- Model server:
-  - `MODEL_DEVICE`
-  - `MODEL_CACHE_DIR`
-  - `MODEL_BATCH_SIZE`
-  - `MODEL_MAX_SEQUENCE_LENGTH`
-  - `MODEL_PRELOAD`
-  - `TAPAS_MODEL_NAME`
-  - `NLI_MODEL_NAME`
-  - `LAYOUT_DOCUMENT_QA_MODEL_NAME`
-  - `VISION_QA_MODEL_NAME`
-  - `SECTION_CLASSIFIER_MODEL_NAME`
+Set `EMBEDDING_PROVIDER=openai`, provide `OPENAI_API_KEY`, and match `EMBEDDING_DIMENSIONS` to the database vector size. For local testing, use `EMBEDDING_PROVIDER=deterministic`.
 
 ## Tests
-
-API:
 
 ```powershell
 pnpm --filter api test
 pnpm --filter api build
 python -m pytest evaluation/tests -q
-```
 
-Model server:
-
-```powershell
 cd apps/model-server
 python -m pytest tests
-python -m compileall app
 ```
 
 ## Documentation
 
-The Obsidian vault is in:
-
-```text
-obsidian-vault
-```
-
-Open that folder in Obsidian and start with:
-
-```text
-Home.md
-```
-
-Useful notes:
+The Obsidian vault in `obsidian-vault/` has deeper coverage. Start with `Home.md`, then:
 
 - `Project Overview`
 - `Architecture/System Architecture`
 - `Workflows/End-to-End Document Workflow`
-- `Workflows/Hybrid Retrieval Workflow`
-- `Workflows/Model Server Inference Workflow`
-- `API/API Reference`
-- `Milestones/Milestone 5 - Model Server`
-- `Milestones/Milestone 6 - LangGraph Agent System`
-- `Milestones/Milestone 7 - Evaluation`
 - `Evaluation/Evaluation Pipeline`
-- `Evaluation/Metrics`
-- `Evaluation/Langfuse Observability`
-
-## Milestones So Far
-
-- Milestone 1: project setup
-- Milestone 3: PDF extraction and chunk storage
-- Milestone 4: hybrid retrieval
-- Milestone 5: model-server table QA, NLI, layout document QA, vision QA, and section classification
-- Milestone 6: LangGraph agent system for planned, verified, cited answers
-- Milestone 7: evaluation framework with quality metrics and stage observability
+- `Runbooks/Troubleshooting`

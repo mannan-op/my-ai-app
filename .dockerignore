@@ -1,0 +1,10 @@
+**/node_modules
+**/.next
+**/dist
+**/.git
+**/storage
+**/.pnpm-store
+**/__pycache__
+**/.pytest_cache
+**/.venv
+**/obsidian-vault/.obsidian

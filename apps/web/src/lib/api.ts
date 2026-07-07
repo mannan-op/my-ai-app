@@ -171,13 +171,29 @@ export async function startEvaluationRun(evaluationId?: string): Promise<Evaluat
 }
 
 async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    cache: "no-store"
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${apiBaseUrl}${path}`, {
+      cache: "no-store"
+    });
+  } catch (error) {
+    throw new Error(formatNetworkError(error));
+  }
 
   if (!response.ok) {
     throw new Error(`API request failed with ${response.status}`);
   }
 
   return response.json() as Promise<T>;
+}
+
+function formatNetworkError(error: unknown): string {
+  const message = error instanceof Error ? error.message : "Network request failed";
+
+  if (/failed to fetch|networkerror|load failed/i.test(message)) {
+    return `Cannot reach the API at ${apiBaseUrl}. Start the backend with "pnpm dev:api" (after Postgres with pgvector is running) or "docker compose up postgres api".`;
+  }
+
+  return message;
 }

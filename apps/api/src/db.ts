@@ -14,7 +14,24 @@ export async function ensureDatabaseSchema(): Promise<void> {
     throw new Error("EMBEDDING_DIMENSIONS must be a positive integer");
   }
 
-  await pool.query("CREATE EXTENSION IF NOT EXISTS vector");
+  try {
+    await pool.query("CREATE EXTENSION IF NOT EXISTS vector");
+  } catch (error) {
+    if (isMissingPgvectorError(error)) {
+      throw new Error(
+        [
+          "PostgreSQL pgvector extension is not installed on this database.",
+          "This app requires pgvector for embeddings.",
+          "Start Docker Desktop, then from the repo root run:",
+          "  docker compose up -d postgres",
+          "Point DATABASE_URL at the Docker Postgres port (see .env.example; default host port 5433).",
+          "Or install pgvector on your local PostgreSQL server."
+        ].join(" ")
+      );
+    }
+
+    throw error;
+  }
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS documents (
@@ -95,6 +112,15 @@ export async function ensureDatabaseSchema(): Promise<void> {
     WITH (lists = 100)
     WHERE embedding IS NOT NULL
   `);
+}
+
+function isMissingPgvectorError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: string }).code === "0A000"
+  );
 }
 
 function loadEnvironment(): void {
