@@ -1,5 +1,7 @@
 # FillingLens
 
+<img width="1918" height="911" alt="image" src="https://github.com/user-attachments/assets/557860cd-3f09-4e50-ae1f-65ae859634cf" />
+
 **FillingLens** is an analyst workspace for SEC filings and financial documents. Upload PDFs, extract layout-aware chunks, search with hybrid retrieval, and ask questions through a LangGraph agent that plans, retrieves evidence, runs numeric analysis, verifies claims, and returns cited markdown answers. A Python model server handles PDF extraction and specialized inference (table QA, NLI, layout/vision QA, section classification). An evaluation pipeline benchmarks retrieval, answer quality, citations, and latency against a golden dataset.
 
 > **Naming note:** The product is branded **FillingLens** in this README. The codebase still uses **FilingLens** in several places (for example `FilingLensState` in the API agent and UI labels in `apps/web`).
